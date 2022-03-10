@@ -5,6 +5,7 @@ const debug = require('debug')('book:album_controller');
   
 
     // Load albums for user
+    
  const loadAlbums = async (req, res) => {
     try {
 
@@ -24,6 +25,8 @@ const debug = require('debug')('book:album_controller');
 	}
 
  }
+
+ // Load one album from user
 
  const loadOneAlbum = async (req, res) => {
         
@@ -51,7 +54,44 @@ const debug = require('debug')('book:album_controller');
 
 }
 
+
+// Add album to user
+
+const storeAlbum = async (req, res) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).send({ status: 'fail', data: errors.array() });
+    }
+
+
+    const validData = matchedData(req);
+    validData.user_id = req.user.id;
+    try {
+        const album = await new models.Album(validData).save();
+        debug("Created new example successfully: %O", album);
+
+        res.send({
+            status: 'success',
+            data:{
+               "title": validData.title,
+               "user_id": validData.user_id,
+               "id": album.id
+
+            }
+            });
+
+    } catch (error) {
+        res.status(500).send({
+            status: 'error',
+            message: 'Exception thrown in database when creating a new album.',
+        });
+        throw error;
+    }
+}
+
  module.exports = {
-     loadAlbums,
-     loadOneAlbum,
+    loadAlbums,
+    loadOneAlbum,
+    storeAlbum
  }

@@ -10,5 +10,6 @@ router.get('/', albumController.loadAlbums);
 // Get a specific album
 router.get('/:albumId', albumController.loadOneAlbum);
 
-
+// Create an album
+router.post('/', albumValidationRules.createRules, albumController.storeAlbum);
 module.exports = router;
