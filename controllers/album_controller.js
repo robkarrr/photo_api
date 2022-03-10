@@ -5,7 +5,7 @@ const debug = require('debug')('book:album_controller');
   
 
     // Load albums for user
-    
+
  const loadAlbums = async (req, res) => {
     try {
 
@@ -90,8 +90,69 @@ const storeAlbum = async (req, res) => {
     }
 }
 
+const storePhoto = async (req, res) => {
+    
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).send({
+            status: 'fail',
+            data: errors.array()
+        });
+    }
+
+    const validData = matchedData(req);
+
+    const photo = await models.Photo.fetchById(validData.photo_id, {require: false})
+    try {
+        // Get the requested album and it's photos
+        const album = await models.Album.fetchById(req.params.albumId, {withRelated: ['photos'], require: false});
+
+        // If the album was not found, return and inform the user
+        if (!album) {
+            return res.status(404).send({
+                status: 'fail',
+                message: 'No such album exists'
+            })
+        }
+
+
+        if(photo.attributes.user_id !== album.attributes.user_id) {
+            return res.status(403).send({
+                status: 'fail',
+                data: "This isn't your photo"
+            })
+        }
+
+
+        if(album.attributes.user_id !== req.user.id) {
+            return res.status(403).send({
+                status: 'fail',
+                data: "This isn't your album"
+            })
+        }
+      
+        await album.photos().attach(validData.photo_id);
+
+
+        res.status(200).send({
+            status: 'succes',
+            data: null
+        });
+
+    } catch (error) {
+        
+        res.status(500).send({
+			status: 'error',
+			message: 'Database error when adding the photo',
+		});
+		throw error;
+    }
+
+}
+
  module.exports = {
     loadAlbums,
     loadOneAlbum,
-    storeAlbum
+    storeAlbum,
+    storePhoto,
  }

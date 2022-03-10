@@ -13,3 +13,7 @@ router.get('/:albumId', albumController.loadOneAlbum);
 // Create an album
 router.post('/', albumValidationRules.createRules, albumController.storeAlbum);
 module.exports = router;
+
+
+// Add photo to album
+router.post('/:albumId/photos',albumValidationRules.storePhotoRules , albumController.storePhoto);
