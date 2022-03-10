@@ -71,10 +71,57 @@ const debug = require('debug')('books:example_controller');
     }
  }
  
+ const updatePhoto = async (req, res) => {
+    let photo = await models.Photo.fetchById(req.params.photoId, {require: false});
+ 
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).send({
+            status: "fail",
+            data: errors.array
+        })
+    }
+ 
+    if(!photo){
+       return res.status(404).send({
+            status: "fail",
+            data: "Photo does not exist"
+        })
+    }
+ 
+    if(photo.attributes.user_id !== req.user.id){
+       return res.status(403).send({
+            status: "fail",
+            data: "This isn't your photo"
+        })
+    }
+ 
+ 
+ 
+ 
+    const validData = matchedData(req);
+ 
+    try{
+         photo = await photo.save(validData);
+ 
+ 
+         res.status(200).send({
+             status: "success",
+             data: photo
+         })
+    } catch (error) {
+        res.status(500).send({
+            status: "fail",
+            data: "Something went wrong when updating the photo",
+        })
+    }
+    
+  }
 
  module.exports = {
     getPhotos,
     showPhoto,
     storePhoto,
+    updatePhoto,
     
  }
