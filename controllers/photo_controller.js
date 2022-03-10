@@ -38,10 +38,43 @@ const debug = require('debug')('books:example_controller');
         data: photo
     })
  }
+
+ // Create new photo
+ const storePhoto = async (req, res) => {
+     
+    const errors = validationResult(req);
+    if(!errors.isEmpty){
+        return res.status(422).send({status: "fail", data: errors.array});
+    }
+
+
+    const validData = matchedData(req);
+    validData.user_id = req.user.id;
+
+
+    try{
+        const photo = await new models.Photo(validData).save();
+
+        res.status(200).send({
+            status: 'success',
+            data: {
+                photo
+            }
+        })
+    }
+    catch(error) {
+        res.status(500).send({
+            status: 'error',
+            message: "Exception thrown in database when creating a new photo",
+        })
+        throw error;
+    }
+ }
  
 
  module.exports = {
     getPhotos,
     showPhoto,
+    storePhoto,
     
  }
