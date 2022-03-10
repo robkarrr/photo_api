@@ -5,6 +5,11 @@ const { body } = require('express-validator');
      body('title').exists().isLength({ min: 3 }),
  ];
 
+ const updateRules = [
+    body('title').optional().isLength({ min: 3 }),
+
+];
+
  const storePhotoRules = [
     body('photo_id').exists().isInt().custom(
         
@@ -25,5 +30,6 @@ const { body } = require('express-validator');
 
  module.exports ={
     createRules,
-    storePhotoRules
+    updateRules,
+    storePhotoRules,
  }

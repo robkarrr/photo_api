@@ -150,9 +150,51 @@ const storePhoto = async (req, res) => {
 
 }
 
+const updateAlbum = async (req, res) => {
+
+    let album = await new models.Album({ id: req.params.albumId }).fetch({ require: false });
+        if (!album) {
+            debug("Album to update was not found. %o", { id: albumId });
+            return res.status(404).send({
+                status: 'fail',
+                data: 'Album Not Found',
+            });
+        }
+        //check if the album belongs to the auth user
+        if(album.attributes.user_id !== req.user.id){
+        return res.status(403).send({ status: 'fail', data: "This isn't your album"})
+            }
+   
+        const validData = matchedData(req);
+
+        try{
+            album = await album.save(validData);
+            
+
+            res.status(200).send({
+                status: 'success',
+                data:{
+                    id: album.attributes.id,
+                    title: album.attributes.title,
+                    user_id: album.attributes.user_id
+                }
+            })
+        } catch (error){
+            res.status(500).send({
+                status: "error",
+                message: "Error when updating album"
+            });
+
+            throw error;
+        }
+
+
+    }
+
  module.exports = {
     loadAlbums,
     loadOneAlbum,
     storeAlbum,
     storePhoto,
+    updateAlbum,
  }
